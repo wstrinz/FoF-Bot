@@ -1,16 +1,16 @@
-require 'java'
-java_package 'fof.bot'
-
 module FoFBot
   class Bot
     include FoFBot
 
     def initialize(room_name="test", name=nil,clientID=nil)
+        time_seed = Time.now.nsec
+        rand_seed = rand(10000)
         unless name
-            name = "bot#{Time.now.nsec}"
+            name = "bot#{time_seed.to_s(32)}_#{rand_seed}"
         end
         unless clientID
-            clientID = (-1 - name.gsub('bot','').to_i).to_s
+            # clientID = "#{time_seed}_#{rand_seed}"
+            clientID = "#{time_seed.to_s(32)}_#{rand_seed}_#{name}"
         end
         FoFBot::config(room_name: room_name, name: name, client_id: clientID)
         @con = FoFBot::Connection.new
@@ -115,8 +115,10 @@ module FoFBot
             events.register("loadFromServer", lambda{|data|
                 state["fields"] ||= {}
                 data["fields"].each_with_index{|f,i|
-                    (state["fields"][i] ||= {})["crop"] = f["crop"]
-
+                    %w[SOM GBI tillage fertilizer crop x y].each{|prop|
+                        (state["fields"][i] ||= {})[prop] = f[prop]
+                    }
+                    # (state["fields"][i] ||= {})["crop"] = f["crop"]
                 }
             })
 
