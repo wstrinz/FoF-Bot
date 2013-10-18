@@ -6,11 +6,10 @@ module FoFBot
         time_seed = Time.now.nsec
         rand_seed = rand(10000)
         unless name
-            name = "bot#{time_seed.to_s(32)}_#{rand_seed}"
+          name = "bot#{time_seed.to_s(32)}_#{rand_seed}"
         end
         unless clientID
-            # clientID = "#{time_seed}_#{rand_seed}"
-            clientID = "#{time_seed.to_s(32)}_#{rand_seed}_#{name}"
+          clientID = "#{time_seed.to_s(32)}_#{rand_seed}_#{name}"
         end
         FoFBot::config(room_name: room_name, name: name, client_id: clientID)
         @con = FoFBot::Connection.new redis_url
@@ -29,24 +28,27 @@ module FoFBot
       sleep(1)
       msg = FoFBot::Message.new().joinRoom(@room, @name)
       @con.send_message(msg,@redis)
-      continue()
+      event_loop()
     end
 
-    def continue
+    def continue(verbose=false)
         ready()
+        event_loop(verbose)
+    end
 
+    def event_loop(verbose=false)
         t = Thread.new do
             catch(:plant) do
               loop do
                 event = @con.queue.pop
-                puts "got #{event}" #if verbose
+                puts "got #{event}" if verbose
                 @events.event(event["event"],event)
               end
 
                 sleep (1)
                 while @con.queue.size > 0 do
                   event = @con.queue.pop
-                  puts "got #{event}" #if verbose
+                  puts "got #{event}" if verbose
                   @events.event(event["event"],event)
                 end
             end
@@ -104,6 +106,19 @@ module FoFBot
 
             events.register("getFarmInfo", lambda{|data|
                 state["capital"] = data["capital"]
+            })
+
+            events.register("fieldDump", lambda{|data|
+                #{"event"=>"fieldDump", "clientID"=>"test", "fields"=>[{"farm"=>"bot9fl1u_2436", "pesticide"=>false, "SOM"=>50.0, "yield"=>0.0, "GBI"=>0.016892175971779624, "year"=>2, "fertilizer"=>false, "till"=>false, "crop"=>"FALLOW", "y"=>2, "x"=>1}, {"farm"=>"bot9fl1u_2436", "pesticide"=>false, "SOM"=>100.0, "yield"=>0.0, "GBI"=>0.016892175971779624, "year"=>2, "fertilizer"=>false, "till"=>false, "crop"=>"FALLOW", "y"=>2, "x"=>2}, {"farm"=>"botlhottc_4226", "pesticide"=>false, "SOM"=>100.0, "yield"=>0.0, "GBI"=>0.016892175971779624, "year"=>0, "fertilizer"=>false, "till"=>false, "crop"=>"FALLOW", "y"=>2, "x"=>3}, {"farm"=>"botlhottc_4226", "pesticide"=>false, "SOM"=>50.0, "yield"=>0.0, "GBI"=>0.016892175971779624, "year"=>0, "fertilizer"=>false, "till"=>false, "crop"=>"FALLOW", "y"=>2, "x"=>4}, {"farm"=>"botcvah6f_1023", "pesticide"=>false, "SOM"=>90.52631578947368, "yield"=>13.401855469557047, "GBI"=>0.07112278851859129, "year"=>0, "fertilizer"=>false, "till"=>false, "crop"=>"CORN", "y"=>4, "x"=>1}, {"farm"=>"botcvah6f_1023", "pesticide"=>false, "SOM"=>50.0, "yield"=>0.0, "GBI"=>0.07112278851859129, "year"=>0, "fertilizer"=>false, "till"=>false, "crop"=>"FALLOW", "y"=>4, "x"=>2}]}
+                state["global"] ||= {}
+                puts data
+                data["fields"].each do |f|
+                    farm = f["farm"]
+                    year = f["year"]
+                    (state["global"][farm] ||= {})[year] ||= {}
+
+                    # (f.keys - ["farm"]).each
+                end
             })
 
             events.register("getLatestFieldHistory", lambda{|data|
