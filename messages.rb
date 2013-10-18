@@ -22,16 +22,28 @@ module FoFBot
 			}
 		end
 
-		def joinRoom(roomName, farmerName, password="")
-			# "event":"joinRoom","roomName":"test","password":"","userName":"a","clientID":"4","roomID":"test","deviseName":"wstrinz@gmail.com"
-			msg = {
-				event: "joinRoom",
-				roomName: roomName,
-				password: password,
-				userName: farmerName,
-				clientID: clid(),
-				roomID: roomName,
+    def joinRoom(roomName, farmerName, password="")
+      # "event":"joinRoom","roomName":"test","password":"","userName":"a","clientID":"4","roomID":"test","deviseName":"wstrinz@gmail.com"
+      msg = {
+        event: "joinRoom",
+        roomName: roomName,
+        password: password,
+        userName: farmerName,
+        clientID: clid(),
+        roomID: roomName,
         deviseName: "#{farmerName}@#{farmerName}.com"
+      }
+      msg.to_json
+    end
+
+    def manageField(field, technique, value)
+			msg = {
+				event: "setFieldManagement",
+				clientID: clid(),
+        roomID: roomID(),
+        field: field,
+				technique: technique,
+        value: value
       }
       msg.to_json
     end
@@ -48,7 +60,7 @@ module FoFBot
         roomID: roomName,
         deviseName: "#{farmerName}@#{farmerName}.com"
       }
-      
+
       msg.to_json
     end
 

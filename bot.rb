@@ -33,6 +33,8 @@ module FoFBot
     end
 
     def continue
+        ready()
+
         t = Thread.new do
             catch(:plant) do
               loop do
@@ -40,13 +42,13 @@ module FoFBot
                 puts "got #{event}" #if verbose
                 @events.event(event["event"],event)
               end
-            end
 
-            sleep (1)
-            while @con.queue.size > 0 do
-              event = @con.queue.pop
-              puts "got #{event}" #if verbose
-              @events.event(event["event"],event)
+                sleep (1)
+                while @con.queue.size > 0 do
+                  event = @con.queue.pop
+                  puts "got #{event}" #if verbose
+                  @events.event(event["event"],event)
+                end
             end
         end
         t.join()
@@ -93,7 +95,7 @@ module FoFBot
                 unless state["paused"]
                   msg = FoFBot::Message.new().getState(@room, @name)
                   @con.send_message(msg,Redis.new(host: @con.redis_host))
-                end  
+                end
             })
 
             events.register("getWrapupInfo", lambda{|data|
@@ -153,7 +155,10 @@ module FoFBot
         crops.each_with_index do |crop,i|
             @con.send_message(Message.new().plantField(i,crop), Redis.new(host: @con.redis_host))
         end
-        ready()
+    end
+
+    def manage(field, technique, value)
+        @con.send_message(Message.new().manageField(field, technique, value), Redis.new(host: @con.redis_host))
     end
 
     def join
