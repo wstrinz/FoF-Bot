@@ -5,6 +5,7 @@ module FoFBot
 
   module EventManager
     attr_accessor :queue
+    attr :redis_host
 
     def send_message(json, redis)
 			redis.lpush("toJava#{FoFBot::config.redis_channel}", json)
@@ -27,8 +28,9 @@ module FoFBot
   class Connection
   	include FoFBot::EventManager
 
-    def initialize
-      @redis = Redis.new
+    def initialize(redis_host = '127.0.0.1')
+      @redis_host = redis_host
+      @redis = Redis.new(host: @redis_host)
       @queue = Queue.new
     end
   end

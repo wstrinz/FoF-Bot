@@ -2,7 +2,7 @@ module FoFBot
   class Bot
     include FoFBot
 
-    def initialize(room_name="test", name=nil,clientID=nil)
+    def initialize(redis_url = '127.0.0.1', room_name="test", name=nil,clientID=nil)
         time_seed = Time.now.nsec
         rand_seed = rand(10000)
         unless name
@@ -13,7 +13,7 @@ module FoFBot
             clientID = "#{time_seed.to_s(32)}_#{rand_seed}_#{name}"
         end
         FoFBot::config(room_name: room_name, name: name, client_id: clientID)
-        @con = FoFBot::Connection.new
+        @con = FoFBot::Connection.new redis_url
         @room = room_name
         @name = name
         @events = FoFBot::event_map
@@ -21,7 +21,7 @@ module FoFBot
     end
 
     def run(verbose=false)
-      @redis = Redis.new
+      @redis = Redis.new(host: @con.redis_host)
       t_con = Thread.new do
         @con.connect()
       end
@@ -84,7 +84,7 @@ module FoFBot
                 state["in_room"] = data["result"]
                 if state["in_room"]
                   msg = FoFBot::Message.new().getState(@room, @name)
-                  @con.send_message(msg,Redis.new)
+                  @con.send_message(msg,Redis.new(host: @con.redis_host))
                 end
             })
 
@@ -92,7 +92,7 @@ module FoFBot
                 state["paused"] = data["state"]
                 unless state["paused"]
                   msg = FoFBot::Message.new().getState(@room, @name)
-                  @con.send_message(msg,Redis.new)
+                  @con.send_message(msg,Redis.new(host: @con.redis_host))
                 end  
             })
 
@@ -142,7 +142,7 @@ module FoFBot
         #     #   ## no history
         #     # array = gams_interface.call('model_name',state)
         #     array = ["corn","grass"]
-        #     # @con.send_message(Message.new().plantField(f,"corn"), Redis.new)
+        #     # @con.send_message(Message.new().plantField(f,"corn"), Redis.new(host: @con.redis_host))
         #     # end
         # }
         throw(:plant)
@@ -151,7 +151,7 @@ module FoFBot
 
     def plant(crops)
         crops.each_with_index do |crop,i|
-            @con.send_message(Message.new().plantField(i,crop), Redis.new)
+            @con.send_message(Message.new().plantField(i,crop), Redis.new(host: @con.redis_host))
         end
         ready()
     end
@@ -159,12 +159,12 @@ module FoFBot
     def join
 
         msg = FoFBot::Message.new().joinRoom(@room, @name)
-        @con.send_message(msg,Redis.new)
+        @con.send_message(msg,Redis.new(host: @con.redis_host))
 
     end
 
     def ready
-        @con.send_message(Message.new().ready(), Redis.new)
+        @con.send_message(Message.new().ready(), Redis.new(host: @con.redis_host))
     end
 
     def resume
