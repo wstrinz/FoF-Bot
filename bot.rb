@@ -111,6 +111,7 @@ module FoFBot
             events.register("fieldDump", lambda{|data|
                 #{"event"=>"fieldDump", "clientID"=>"test", "fields"=>[{"farm"=>"bot9fl1u_2436", "pesticide"=>false, "SOM"=>50.0, "yield"=>0.0, "GBI"=>0.016892175971779624, "year"=>2, "fertilizer"=>false, "till"=>false, "crop"=>"FALLOW", "y"=>2, "x"=>1}, {"farm"=>"bot9fl1u_2436", "pesticide"=>false, "SOM"=>100.0, "yield"=>0.0, "GBI"=>0.016892175971779624, "year"=>2, "fertilizer"=>false, "till"=>false, "crop"=>"FALLOW", "y"=>2, "x"=>2}, {"farm"=>"botlhottc_4226", "pesticide"=>false, "SOM"=>100.0, "yield"=>0.0, "GBI"=>0.016892175971779624, "year"=>0, "fertilizer"=>false, "till"=>false, "crop"=>"FALLOW", "y"=>2, "x"=>3}, {"farm"=>"botlhottc_4226", "pesticide"=>false, "SOM"=>50.0, "yield"=>0.0, "GBI"=>0.016892175971779624, "year"=>0, "fertilizer"=>false, "till"=>false, "crop"=>"FALLOW", "y"=>2, "x"=>4}, {"farm"=>"botcvah6f_1023", "pesticide"=>false, "SOM"=>90.52631578947368, "yield"=>13.401855469557047, "GBI"=>0.07112278851859129, "year"=>0, "fertilizer"=>false, "till"=>false, "crop"=>"CORN", "y"=>4, "x"=>1}, {"farm"=>"botcvah6f_1023", "pesticide"=>false, "SOM"=>50.0, "yield"=>0.0, "GBI"=>0.07112278851859129, "year"=>0, "fertilizer"=>false, "till"=>false, "crop"=>"FALLOW", "y"=>4, "x"=>2}]}
                 (state["global"] ||= []) << data["fields"]
+                state["global"].flatten!
                 # data["fields"].each do |f|
                 #     farm = f["farm"]
                 #     year = f["year"]
