@@ -28,7 +28,7 @@ module FoFBot
       sleep(1)
       msg = FoFBot::Message.new().joinRoom(@room, @name)
       @con.send_message(msg,@redis)
-      event_loop()
+      event_loop(verbose)
     end
 
     def continue(verbose=false)
@@ -44,14 +44,14 @@ module FoFBot
                 puts "got #{event}" if verbose
                 @events.event(event["event"],event)
               end
-
-                sleep (1)
-                while @con.queue.size > 0 do
-                  event = @con.queue.pop
-                  puts "got #{event}" if verbose
-                  @events.event(event["event"],event)
-                end
             end
+
+              sleep (1)
+              while @con.queue.size > 0 do
+                event = @con.queue.pop
+                puts "after got #{event}" if verbose
+                @events.event(event["event"],event)
+              end
         end
         t.join()
     end
@@ -133,7 +133,7 @@ module FoFBot
                 state["fields"] ||= {}
                 data["fields"].each_with_index{|f,i|
                     %w[SOM GBI tillage fertilizer crop x y].each{|prop|
-                        (state["fields"][i] ||= {})[prop] = f[prop]
+                        (state["fields"][i] ||= {})[prop] = f[prop] if f[prop] != nil
                     }
                     # (state["fields"][i] ||= {})["crop"] = f["crop"]
                 }
