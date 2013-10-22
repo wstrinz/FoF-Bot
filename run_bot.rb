@@ -1,11 +1,11 @@
 #!/usr/bin/env ruby
 
-require_relative 'loader.rb'
-b =FoFBot::Bot.new('127.0.0.1', ARGV[0] || "test")
+require_relative 'combined.rb'
+# require_relative 'loader.rb'
+b =FoFBot::Bot.new('127.0.0.1', ARGV[0] || "test", 
+  ARGV[1] || "B_#{Time.now.nsec.to_s(32)}_#{rand(100)}")
 b.run(true)
 
-require 'pry'
-binding.pry
 b.plant(["corn"])
 b.continue
 b.plant(["grass","grass"])
