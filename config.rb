@@ -2,7 +2,8 @@ module FoFBot
   extend self
 
   class << self
-  	DEFAULTS = {room_name: 'test', name: 'bot1', redis_channel: 'dev', client_id: '8000'}
+  	DEFAULTS = {room_name: 'test', name: 'bot1', redis_channel: 'edge', client_id: '8000'}
+
     def config(opts=DEFAULTS)
       @config ||= Config.new(DEFAULTS.merge(opts))
     end

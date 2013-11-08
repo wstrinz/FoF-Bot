@@ -39,19 +39,19 @@ module FoFBot
     def event_loop(verbose=false)
         t = Thread.new do
             catch(:plant) do
-              loop do
+                loop do
+                    event = @con.queue.pop
+                    puts "got #{event}" if verbose
+                    @events.event(event["event"],event)
+                end
+
+            end
+            sleep (1)
+            while @con.queue.size > 0 do
                 event = @con.queue.pop
                 puts "got #{event}" if verbose
                 @events.event(event["event"],event)
-              end
             end
-
-              sleep (1)
-              while @con.queue.size > 0 do
-                event = @con.queue.pop
-                puts "after got #{event}" if verbose
-                @events.event(event["event"],event)
-              end
         end
         t.join()
     end
@@ -61,27 +61,25 @@ module FoFBot
         FoFBot.setup_events do |events|
 
             events.register("changeSettings", lambda{|data|
-                #"event":"changeSettings","clientID":8000,"mgmtOptsOn":false,"contractsOn":false,"fields":2
-                # settings = (state["settings"] ||= {})
-                # settings["mgmtOptsOn"] = data["mgmtOptsOn"]
-                # settings["contractsOn"] = data["contractsOn"]
-                # settings["fields"] = data["fields"]
                 state.autoload(data,%w(mgmtOptsOn contractsOn fields),"settings")
+            })
+
+            events.register("kickPlayer", lambda{|data|
+                if data["result"] && data["player"] == @name
+                    puts "kicked!"
+                    exit()
+                end
             })
 
             events.register("advanceStage", lambda{|data|
                 puts "advance Stage! yay "
                 state.autoload(data,%w(year stageName stageNumber))
-                # open('state.json','w'){|f| f.write state.to_json}
                 case data["stageName"]
                 when "Plant"
                     plant_stage()
                 else
                     ready()
                 end
-                # state["year"] = data["year"]
-                # state["stageName"] = data["stageName"]
-                # state["stageNumber"] = data["stageNumber"]
             })
 
             events.register("joinRoom", lambda{|data|
@@ -109,16 +107,8 @@ module FoFBot
             })
 
             events.register("fieldDump", lambda{|data|
-                #{"event"=>"fieldDump", "clientID"=>"test", "fields"=>[{"farm"=>"bot9fl1u_2436", "pesticide"=>false, "SOM"=>50.0, "yield"=>0.0, "GBI"=>0.016892175971779624, "year"=>2, "fertilizer"=>false, "till"=>false, "crop"=>"FALLOW", "y"=>2, "x"=>1}, {"farm"=>"bot9fl1u_2436", "pesticide"=>false, "SOM"=>100.0, "yield"=>0.0, "GBI"=>0.016892175971779624, "year"=>2, "fertilizer"=>false, "till"=>false, "crop"=>"FALLOW", "y"=>2, "x"=>2}, {"farm"=>"botlhottc_4226", "pesticide"=>false, "SOM"=>100.0, "yield"=>0.0, "GBI"=>0.016892175971779624, "year"=>0, "fertilizer"=>false, "till"=>false, "crop"=>"FALLOW", "y"=>2, "x"=>3}, {"farm"=>"botlhottc_4226", "pesticide"=>false, "SOM"=>50.0, "yield"=>0.0, "GBI"=>0.016892175971779624, "year"=>0, "fertilizer"=>false, "till"=>false, "crop"=>"FALLOW", "y"=>2, "x"=>4}, {"farm"=>"botcvah6f_1023", "pesticide"=>false, "SOM"=>90.52631578947368, "yield"=>13.401855469557047, "GBI"=>0.07112278851859129, "year"=>0, "fertilizer"=>false, "till"=>false, "crop"=>"CORN", "y"=>4, "x"=>1}, {"farm"=>"botcvah6f_1023", "pesticide"=>false, "SOM"=>50.0, "yield"=>0.0, "GBI"=>0.07112278851859129, "year"=>0, "fertilizer"=>false, "till"=>false, "crop"=>"FALLOW", "y"=>4, "x"=>2}]}
                 (state["global"] ||= []) << data["fields"]
                 state["global"].flatten!
-                # data["fields"].each do |f|
-                #     farm = f["farm"]
-                #     year = f["year"]
-                #     (state["global"][farm] ||= {})[year] ||= {}
-
-                #     # (f.keys - ["farm"]).each
-                # end
             })
 
             events.register("getLatestFieldHistory", lambda{|data|
@@ -135,7 +125,6 @@ module FoFBot
                     %w[SOM GBI tillage fertilizer crop x y].each{|prop|
                         (state["fields"][i] ||= {})[prop] = f[prop] if f[prop] != nil
                     }
-                    # (state["fields"][i] ||= {})["crop"] = f["crop"]
                 }
             })
 
@@ -152,19 +141,7 @@ module FoFBot
     end
 
     def plant_stage
-        # FoFBot.state["settings"]["fields"].times{|f|
-        #     field = (FoFBot.state["fields"] ||= {})[f]
-        #     # if field
-        #     #   ## do thinking
-        #     # else
-        #     #   ## no history
-        #     # array = gams_interface.call('model_name',state)
-        #     array = ["corn","grass"]
-        #     # @con.send_message(Message.new().plantField(f,"corn"), Redis.new(host: @con.redis_host))
-        #     # end
-        # }
         throw(:plant)
-        # ready()
     end
 
     def plant(crops)

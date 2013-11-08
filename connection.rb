@@ -1,7 +1,6 @@
-
 module FoFBot
   require 'redis'
-  require 'thread'
+  # require 'thread'
 
   module EventManager
     attr_accessor :queue
@@ -16,7 +15,6 @@ module FoFBot
         on.message do |channel, msg|
           data = JSON.parse(msg)
           if(data["clientID"].to_s==FoFBot::config.client_id || data["clientID"] == FoFBot::config.room_name)
-            # puts "con got #{data}"
             @queue << data
           end
         end
