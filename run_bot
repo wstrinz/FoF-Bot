@@ -1,14 +1,18 @@
 #!/usr/bin/env ruby
 
 require_relative 'loader.rb'
-b =FoFBot::Bot.new('127.0.0.1', ARGV[0] || "test")
+b = FoFBot::Bot.new('127.0.0.1', ARGV[0] || "test")
 b.run #true
-b.plant(["corn"])
-b.continue
-b.plant(["grass","grass"])
-b.continue
-b.plant(["corn"])
-b.continue
-b.plant(["grass","grass"])
-b.continue
-puts FoFBot.state.state["global"]
+loop do
+  fields = FoFBot.state.state["fields"]
+  planting = fields.map{|n,state|
+    if state["SOM"] < 30 || (state["SOM"] < 70 && state["crop"] == "GRASS") #&& state["SOM"]
+      "grass"
+    else
+      "corn"
+    end
+  }
+
+  b.plant(planting)
+  b.continue
+end
