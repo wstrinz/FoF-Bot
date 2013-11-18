@@ -21,5 +21,19 @@ module FoFBot
     def bots
       @bots ||= []
     end
+
+    def stop_all
+      puts "stopping #{bots.size} bots"
+      bots.each{|b|
+        b.stop
+      }
+      bots.clear
+    end
+
+    def stop(n_bots)
+      bots.shift(n_bots).each{|b|
+        b.stop
+      }
+    end
   end
 end

@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require_relative 'loader.rb'
-b = FoFBot::Bot.new('127.0.0.1', ARGV[0] || "test")
+b =FoFBot::Bot.new('127.0.0.1', ARGV[0] || "test")
 b.run #true
 loop do
   fields = FoFBot.state.state["fields"]
