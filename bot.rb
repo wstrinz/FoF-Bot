@@ -37,23 +37,20 @@ module FoFBot
     end
 
     def event_loop(verbose=false)
-        t = Thread.new do
-            catch(:plant) do
-                loop do
-                    event = @con.queue.pop
-                    puts "got #{event}" if verbose
-                    @events.event(event["event"],event)
-                end
-
-            end
-            sleep (1)
-            while @con.queue.size > 0 do
+        catch(:plant) do
+            loop do
                 event = @con.queue.pop
                 puts "got #{event}" if verbose
                 @events.event(event["event"],event)
             end
+
         end
-        t.join()
+        sleep (1)
+        while @con.queue.size > 0 do
+            event = @con.queue.pop
+            puts "got #{event}" if verbose
+            @events.event(event["event"],event)
+        end
     end
 
     def setup_behavior
